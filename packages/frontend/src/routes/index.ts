@@ -566,7 +566,7 @@ const routes: RouteRecordRaw[] = [
         name: ROUTES_NAMES.welcome,
         beforeEnter: redirectRouteGuard,
         component: () => import('@/pages/auth/welcome.vue'),
-        meta: { i18nChunks: ['auth/welcome'] as I18nChunkName[] },
+        meta: { i18nChunks: ['auth/welcome', 'errors'] as I18nChunkName[] },
       },
       {
         path: '/auth/callback',

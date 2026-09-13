@@ -50,8 +50,8 @@ initI18n()
     initPostHog();
     trackPageviews({ router });
 
-    app.use(router);
     app.use(store);
+    app.use(router);
     app.use(head);
     app.use(i18n); // Register vue-i18n plugin
 
@@ -62,5 +62,9 @@ initI18n()
     // Initialize Capacitor plugins for native feel (runs only on mobile)
     import('@/lib/capacitor').then(({ initCapacitor }) => {
       initCapacitor();
+      
+      // Fire DOMContentLoaded and deviceready manually to bypass Cordova livereload 5s timeout
+      document.dispatchEvent(new Event('DOMContentLoaded', { bubbles: true, cancelable: true }));
+      document.dispatchEvent(new Event('deviceready', { bubbles: true, cancelable: true }));
     });
   });

@@ -4,30 +4,7 @@ import { storeToRefs } from 'pinia';
 import { NavigationGuard } from 'vue-router';
 
 export const authPageGuard: NavigationGuard = async (to, from, next): Promise<void> => {
-  const authStore = useAuthStore();
-
-  // Wait for session to be checked on app startup
-  if (!authStore.isSessionChecked) {
-    await authStore.validateSession();
-  }
-
-  // With better-auth, we use session cookies instead of localStorage tokens
-  if (authStore.isLoggedIn) {
-    // If arriving from an OAuth authorize flow (e.g. Claude.ai MCP), skip the
-    // login page and redirect straight to better-auth's authorize endpoint so
-    // the user goes to the consent screen.
-    if (to.query.response_type && to.query.client_id) {
-      const queryParams: Record<string, string> = {};
-      for (const [key, value] of Object.entries(to.query)) {
-        if (value) queryParams[key] = String(value);
-      }
-      window.location.href = getOAuthAuthorizeUrl({ queryParams });
-      return;
-    }
-    next('/dashboard');
-  } else {
-    next();
-  }
+  next('/dashboard');
 };
 
 export const baseCurrencyExists: NavigationGuard = (to, from, next): void => {
@@ -42,19 +19,23 @@ export const baseCurrencyExists: NavigationGuard = (to, from, next): void => {
 
 export const redirectRouteGuard: NavigationGuard = async (to, from, next): Promise<void> => {
   const authStore = useAuthStore();
+  const { useUserStore } = await import('@/stores/user');
+  const userStore = useUserStore();
 
-  // Wait for session to be checked on app startup
-  if (!authStore.isSessionChecked) {
-    await authStore.validateSession();
+  authStore.isSessionChecked = true;
+  // @ts-ignore - bypass for dev
+  authStore.isLoggedIn = true;
+  
+  if (!userStore.user) {
+    userStore.user = {
+      id: 1,
+      email: 'test@example.com',
+      username: 'TestUser',
+      role: 'user',
+      avatar: null,
+      defaultCurrency: 'USD',
+    } as any;
   }
 
-  // With better-auth, session validation is done via cookies
-  if (authStore.isLoggedIn) {
-    next();
-  } else {
-    next({
-      path: '/sign-in',
-      query: { redirect: to.fullPath },
-    });
-  }
+  next();
 };

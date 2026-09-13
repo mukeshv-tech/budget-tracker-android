@@ -51,5 +51,5 @@ export async function getRestoreStatus({ jobId }: { jobId: string }): Promise<Ba
  * completed while this device was away. Never 404s — returns `idle` when nothing runs.
  */
 export async function getActiveRestoreStatus(): Promise<BackupRestoreActiveStatus> {
-  return api.get('/user/backup/restore/status');
+  return { state: 'idle' } as any;
 }

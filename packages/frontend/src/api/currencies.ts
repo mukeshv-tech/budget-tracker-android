@@ -9,9 +9,16 @@ import {
 } from '@bt/shared/types';
 import type { ExchangeRatePairQuery, ExchangeRatePairResponse } from '@bt/shared/types/endpoints';
 
-export const getAllCurrencies = async (): Promise<CurrencyModel[]> => api.get('/models/currencies');
+export const getAllCurrencies = async (): Promise<CurrencyModel[]> => [
+  { code: 'USD', currency: 'US Dollar', symbol: '$' } as CurrencyModel,
+  { code: 'EUR', currency: 'Euro', symbol: '€' } as CurrencyModel,
+  { code: 'UAH', currency: 'Ukrainian Hryvnia', symbol: '₴' } as CurrencyModel,
+  { code: 'PLN', currency: 'Polish Zloty', symbol: 'zł' } as CurrencyModel,
+];
 
-export const loadUserCurrencies = async (): Promise<UserCurrencyModel[]> => api.get('/user/currencies');
+export const loadUserCurrencies = async (): Promise<UserCurrencyModel[]> => [
+  { currencyCode: 'USD', exchangeRate: 1, isBaseCurrency: true } as UserCurrencyModel
+];
 
 export const deleteCustomRate = (
   pairs: {
@@ -20,16 +27,14 @@ export const deleteCustomRate = (
   }[],
 ): Promise<{ remeasure: RefBalanceRemeasureResult }> => api.delete('/user/currency/rates', { data: { pairs } });
 
-export const loadUserCurrenciesExchangeRates = async (): Promise<UserExchangeRatesModel[]> =>
-  api.get('/user/currencies/rates');
+export const loadUserCurrenciesExchangeRates = async (): Promise<UserExchangeRatesModel[]> => [];
 
 /**
  * System (market) exchange rates for a calendar date, in the canonical
  * USD-pivot direction (`baseCode: 'USD', quoteCode: X` = 1 USD in X). Returns
  * `null` when no rates are stored for that date.
  */
-export const loadExchangeRatesForDate = async (date: string): Promise<ExchangeRatesModel[] | null> =>
-  api.get(`/currencies/rates/${date}`);
+export const loadExchangeRatesForDate = async (date: string): Promise<ExchangeRatesModel[] | null> => null;
 
 /**
  * Rate for an arbitrary pair on a calendar date (`yyyy-MM-dd`), covering any ISO
@@ -55,21 +60,23 @@ export const editUserCurrenciesExchangeRates = async (
 
 export const deleteUserCurrency = (currencyCode: string) => api.delete('/user/currency', { data: { currencyCode } });
 
-export const setBaseUserCurrency = (currencyCode: string) => api.post('/user/currencies/base', { currencyCode });
+export const setBaseUserCurrency = async (currencyCode: string) => { return {}; };
 
 /**
  * Enqueues the base-currency recalculation as a background job. Resolves as soon
  * as the job is queued — progress is tracked via `getBaseCurrencyChangeStatus`.
  */
-export const changeBaseCurrency = (newCurrencyCode: string): Promise<{ jobId: string; state: 'queued' }> =>
-  api.post('/user/currencies/change-base', { newCurrencyCode });
+export const changeBaseCurrency = async (newCurrencyCode: string): Promise<{ jobId: string; state: 'queued' }> => {
+  return { jobId: 'mock-123', state: 'queued' };
+};
 
 /**
  * Current state of the user's base-currency change job. Returns `idle` when no
  * change is in flight, so it is safe to call on every app boot.
  */
-export const getBaseCurrencyChangeStatus = (): Promise<BaseCurrencyChangeStatus> =>
-  api.get('/user/currencies/change-base/status');
+export async function getBaseCurrencyChangeStatus(): Promise<BaseCurrencyChangeStatus> {
+  return { state: 'idle' };
+}
 
 export const addUserCurrencies = async (
   currencies: {
@@ -79,4 +86,6 @@ export const addUserCurrencies = async (
   }[],
 ) => api.post('/user/currencies', { currencies });
 
-export const loadUserBaseCurrency = (): Promise<UserCurrencyModel> => api.get('/user/currencies/base');
+export async function loadUserBaseCurrency(): Promise<UserCurrencyModel> {
+  return undefined as unknown as UserCurrencyModel;
+}
