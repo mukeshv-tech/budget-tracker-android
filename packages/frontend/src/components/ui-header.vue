@@ -3,7 +3,7 @@
     <DemoBanner />
     <div
       ref="headerBarRef"
-      class="shadow-header border-border @container/header-bar flex items-center justify-between border-b px-4 py-2 sm:px-6"
+      class="shadow-header border-border @container/header-bar flex items-center justify-between border-b px-4 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))] sm:px-6"
     >
       <div class="flex items-center gap-4">
         <template v-if="isMobileView">

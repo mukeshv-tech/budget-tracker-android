@@ -58,4 +58,9 @@ initI18n()
     app.use(VueQueryPlugin, { queryClient });
 
     app.mount('#app');
+    
+    // Initialize Capacitor plugins for native feel (runs only on mobile)
+    import('@/lib/capacitor').then(({ initCapacitor }) => {
+      initCapacitor();
+    });
   });
